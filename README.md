@@ -56,7 +56,7 @@ To train a robust Cora model, you first need to train a natural model to get the
 ```
 python adv_train_pgd.py
 ```
-This will train a robust GCN model using the method proposed in our paper  on Cora dataset and save it at ```nat_cora``` directory.
+This will train a robust GCN model using the method proposed in our paper  on Cora dataset and save it at ```rob_cora``` directory.
 
 Attack a Model
 -----------------------
