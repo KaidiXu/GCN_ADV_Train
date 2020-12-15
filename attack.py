@@ -33,7 +33,7 @@ flags.DEFINE_float('weight_decay', 5e-4, 'Weight for L2 loss on embedding matrix
 
 # Load data
 adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask = load_data(FLAGS.dataset)
-total_edges = adj.data.shape[0]
+total_edges = adj.data.shape[0]/2
 n_node = adj.shape[0]
 
 # Some preprocessing
