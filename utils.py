@@ -149,7 +149,7 @@ def construct_feed_dict(features, support, labels, labels_mask, placeholders, tr
 def bisection(a,eps,xi,ub=1):
     pa = np.clip(a, 0, ub)
     if np.sum(pa) <= eps:
-        print('np.sum(pa) <= eps !!!!')
+        # print('np.sum(pa) <= eps !!!!')
         upper_S_update = pa
     else:
         mu_l = np.min(a-1)

@@ -3,10 +3,8 @@ from __future__ import print_function
 
 import time
 import tensorflow as tf
-import scipy.sparse as sp
 import copy
 import numpy as np
-import matplotlib.pyplot as plt
 import os
 
 from utils import *
@@ -24,7 +22,7 @@ flags.DEFINE_string('model_dir', 'nat_cora', 'saved model directory')
 flags.DEFINE_string('dataset', 'cora', 'Dataset string.')  # 'cora', 'citeseer', 'pubmed'
 flags.DEFINE_integer('steps', 100, 'Number of steps to attack')
 flags.DEFINE_float('learning_rate', 0.001, 'Initial learning rate.')
-flags.DEFINE_integer('hidden1', 16, 'Number of units in hidden layer 1.')
+flags.DEFINE_integer('hidden1', 32, 'Number of units in hidden layer 1.')
 flags.DEFINE_float('dropout', 0., 'Dropout rate (1 - keep probability).')
 flags.DEFINE_integer('early_stopping', 10, 'Tolerance for early stopping (# of steps).')
 flags.DEFINE_string('method', 'PGD', 'attack method, PGD or CW')
@@ -88,6 +86,18 @@ lmd = 1
 eps = total_edges * FLAGS.perturb_ratio
 xi = 1e-5
 
+## results before attack
+test_cost, test_acc, test_duration = evaluate(features, support, y_train, train_mask, placeholders)
+print("Train set results:", "cost=", "{:.5f}".format(test_cost),
+      "accuracy=", "{:.5f}".format(test_acc), "time=", "{:.5f}".format(test_duration))
+test_cost, test_acc, test_duration = evaluate(features, support, y_val, val_mask, placeholders)
+print("Validation set results:", "cost=", "{:.5f}".format(test_cost),
+      "accuracy=", "{:.5f}".format(test_acc), "time=", "{:.5f}".format(test_duration))
+test_cost, test_acc, test_duration = evaluate(features, support, y_test, test_mask, placeholders)
+print("Test set results:", "cost=", "{:.5f}".format(test_cost),
+      "accuracy=", "{:.5f}".format(test_acc), "time=", "{:.5f}".format(test_duration))
+
+
 label = y_train
 label_mask = train_mask + test_mask
 
@@ -141,7 +151,7 @@ for epoch in range(FLAGS.steps):
     upper_S_update_tmp = upper_S_update[:]
     if epoch == FLAGS.steps - 1:
         acc_record, support_record, p_ratio_record = [], [], []
-        for i in range(20):
+        for i in range(10):
             print('random start!')
             randm = np.random.uniform(size=(n_node, n_node))
             upper_S_update = np.where(upper_S_update_tmp > randm, 1, 0)
@@ -153,16 +163,16 @@ for epoch in range(FLAGS.steps):
                 acc_record.append(acc)
                 support_record.append(support)
                 p_ratio_record.append(pr)
-            print("Epoch:", '%04d' % (epoch + 1), "val_loss=", "{:.5f}".format(cost),
-                  "val_acc=", "{:.5f}".format(acc), "time=", "{:.5f}".format(time.time() - t))
+            print("Epoch:", '%04d' % (epoch + 1), "test_loss=", "{:.5f}".format(cost),
+                  "test_acc=", "{:.5f}".format(acc), "time=", "{:.5f}".format(time.time() - t))
             print("perturb ratio", pr)
             print('random end!')
         # Validation
         support = support_record[np.argmin(np.array(acc_record))]
     cost, acc, duration = evaluate(features, support, y_test, test_mask, placeholders)
     # Print results
-    print("Epoch:", '%04d' % (epoch + 1), "val_loss=", "{:.5f}".format(cost),
-          "val_acc=", "{:.5f}".format(acc), "time=", "{:.5f}".format(time.time() - t))
+    print("Epoch:", '%04d' % (epoch + 1), "test_loss=", "{:.5f}".format(cost),
+          "test_acc=", "{:.5f}".format(acc), "time=", "{:.5f}".format(time.time() - t))
 
 print("attack Finished!")
 print("perturb ratio", np.count_nonzero(upper_S_update[0]) / total_edges)
